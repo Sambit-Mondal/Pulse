@@ -155,9 +155,33 @@ USE_VECTOR_SEARCH=false
 NEXT_PUBLIC_MAP_STYLE=https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json
 ```
 
-### 4. Seed the Database
+### 4. Configure Atlas Vector Search (Optional but Recommended)
 
-Ensure MongoDB is running, then:
+Before seeding the database, you can optionally enable hardware-accelerated similarity search by creating a Vector Search Index in your MongoDB Atlas Dashboard.
+
+1. Go to your Atlas Dashboard → Database → Pulse cluster → **Atlas Search** tab.
+2. Click **Create Search Index** → Choose **JSON Editor**.
+3. Select the `pulse` database and `events` collection.
+4. Name the index `vector_index` and paste the following JSON:
+
+```json
+{
+  "fields": [
+    {
+      "numDimensions": 15,
+      "path": "embedding",
+      "similarity": "cosine",
+      "type": "vector"
+    }
+  ]
+}
+```
+5. Click **Next** and **Create Search Index**.
+6. Set `USE_VECTOR_SEARCH=true` in your `.env` file.
+
+### 5. Seed the Database
+
+Ensure MongoDB is running (or your Atlas connection string is correct), then:
 
 ```bash
 npm run seed
@@ -166,10 +190,10 @@ npm run seed
 This will:
 1. Parse `dataset/dataset.csv` (8,205 events)
 2. Cleanse and impute missing data
-3. Generate feature embeddings
+3. Generate feature embeddings (15 dimensions)
 4. Bulk insert into MongoDB
 
-### 5. Start Development Server
+### 6. Start Development Server
 
 ```bash
 npm run dev
