@@ -1,14 +1,16 @@
-# PULSE — AI-Driven Congestion Copilot
-
 <div align="center">
+
+# Pulse
 
 **Event-Driven Traffic Intelligence for Bengaluru Traffic Police**
 
-An AI-powered Congestion Copilot that predicts localized traffic bottlenecks caused by planned and unplanned events, and recommends dynamic resource allocation — barricades, manpower, and diversions.
+![Pulse Logo](public/Pulse_logo.png)
+
+An AI-powered Congestion Copilot that predicts localized traffic bottlenecks caused by planned and unplanned events, and recommends dynamic resource allocation - barricades, manpower, and diversions.
 
 [![Next.js](https://img.shields.io/badge/Next.js-16-black?logo=next.js)](https://nextjs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178C6?logo=typescript)](https://typescriptlang.org/)
-[![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-4.x-06B6D4?logo=tailwindcss)](https://tailwindcss.com/)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-3.x-06B6D4?logo=tailwindcss)](https://tailwindcss.com/)
 [![MongoDB](https://img.shields.io/badge/MongoDB-9.x-47A248?logo=mongodb)](https://mongodb.com/)
 [![Groq](https://img.shields.io/badge/Groq-llama--3.3--70b-orange)](https://groq.com/)
 
