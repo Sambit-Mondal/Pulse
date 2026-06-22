@@ -10,11 +10,12 @@ import type { PredictImpactRequest, PredictionResult } from '@/lib/types';
 // ---------------------------------------------------------------------------
 interface CopilotPanelProps {
   clickedCoords: { lat: number; lng: number } | null;
+  onPrediction?: (prediction: PredictionResult | null) => void;
 }
 
 type TabId = 'new-event' | 'analysis';
 
-export default function CopilotPanel({ clickedCoords }: CopilotPanelProps) {
+export default function CopilotPanel({ clickedCoords, onPrediction }: CopilotPanelProps) {
   const [activeTab, setActiveTab] = useState<TabId>('new-event');
   const [isLoading, setIsLoading] = useState(false);
   const [prediction, setPrediction] = useState<PredictionResult | null>(null);
@@ -39,6 +40,7 @@ export default function CopilotPanel({ clickedCoords }: CopilotPanelProps) {
       }
 
       setPrediction(result.prediction);
+      if (onPrediction) onPrediction(result.prediction);
       setActiveTab('analysis');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An unexpected error occurred');

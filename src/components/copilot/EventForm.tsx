@@ -34,6 +34,10 @@ export default function EventForm({ onSubmit, isLoading, clickedCoords }: EventF
   const [requiresRoadClosure, setRequiresRoadClosure] = useState(false);
   const [description, setDescription] = useState('');
 
+  const [chatInput, setChatInput] = useState('');
+  const [isExtracting, setIsExtracting] = useState(false);
+  const [extractionError, setExtractionError] = useState('');
+
   // Update coords when map is clicked
   React.useEffect(() => {
     if (clickedCoords) {
@@ -55,8 +59,95 @@ export default function EventForm({ onSubmit, isLoading, clickedCoords }: EventF
     });
   };
 
+  const handleExtract = async () => {
+    if (!chatInput.trim()) return;
+    setIsExtracting(true);
+    setExtractionError('');
+    try {
+      const res = await fetch('/api/extract-event', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: chatInput }),
+      });
+      const data = await res.json();
+      if (!data.success) {
+        throw new Error(data.error);
+      }
+
+      if (data.data.eventCause) setEventCause(data.data.eventCause);
+      if (data.data.priority) setPriority(data.data.priority);
+      if (typeof data.data.requiresRoadClosure === 'boolean') {
+        setRequiresRoadClosure(data.data.requiresRoadClosure);
+      }
+      
+      if (data.data.latitude && data.data.longitude) {
+        setLatitude(data.data.latitude.toFixed(6));
+        setLongitude(data.data.longitude.toFixed(6));
+      } else if (data.data.locationQuery) {
+        setExtractionError(`Could not find coordinates for "${data.data.locationQuery}". Please click the map.`);
+      } else {
+        setExtractionError('Could not extract a location. Please click the map.');
+      }
+      
+      setChatInput('');
+    } catch (err: any) {
+      setExtractionError(err.message || 'Failed to extract data.');
+    } finally {
+      setIsExtracting(false);
+    }
+  };
+
   return (
     <form id="event-form" onSubmit={handleSubmit} className="space-y-6">
+      {/* AI Extraction Input */}
+      <div className="p-4 rounded-xl bg-gradient-to-br from-cyan-500/10 to-purple-500/5 border border-cyan-500/20">
+        <label className="flex items-center gap-2 text-xs font-semibold text-cyan-400 uppercase tracking-wider mb-3">
+          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z" />
+          </svg>
+          Conversational Input
+        </label>
+        <div className="flex gap-2">
+          <input
+            suppressHydrationWarning
+            type="text"
+            value={chatInput}
+            onChange={(e) => setChatInput(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                e.preventDefault();
+                handleExtract();
+              }
+            }}
+            placeholder="e.g. Severe water logging near Silk Board..."
+            className="flex-1 px-3 py-2.5 rounded-lg bg-slate-900/50 border border-slate-700/50 text-sm text-slate-200 placeholder:text-slate-500 focus:outline-none focus:border-cyan-500/50 transition-colors"
+          />
+          <button
+            suppressHydrationWarning
+            type="button"
+            onClick={handleExtract}
+            disabled={isExtracting || !chatInput.trim()}
+            className="px-4 py-2.5 rounded-lg bg-cyan-500/20 text-cyan-300 font-medium text-sm hover:bg-cyan-500/30 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          >
+            {isExtracting ? '...' : 'Extract'}
+          </button>
+        </div>
+        {extractionError && (
+          <p className="mt-3 text-xs text-amber-400 flex items-center gap-1.5 bg-amber-500/10 px-3 py-2 rounded-lg border border-amber-500/20">
+            <svg className="w-3.5 h-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            </svg>
+            {extractionError}
+          </p>
+        )}
+      </div>
+
+      <div className="flex items-center gap-4">
+        <div className="flex-1 h-px bg-slate-700/50"></div>
+        <span className="text-[10px] text-slate-500 uppercase tracking-widest font-semibold">Or Manual Entry</span>
+        <div className="flex-1 h-px bg-slate-700/50"></div>
+      </div>
+
       {/* Coordinate picker notice */}
       <div className="flex items-center gap-2 px-4 py-3 rounded-lg bg-cyan-500/5 border border-cyan-500/10">
         <svg className="w-4 h-4 text-cyan-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>

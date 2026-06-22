@@ -17,6 +17,7 @@ export default function DashboardLayout() {
   const [clickedCoords, setClickedCoords] = useState<{ lat: number; lng: number } | null>(null);
   const [isLoadingEvents, setIsLoadingEvents] = useState(true);
   const [panelOpen, setPanelOpen] = useState(true);
+  const [activePrediction, setActivePrediction] = useState<any>(null);
 
   // Fetch events on mount
   useEffect(() => {
@@ -112,6 +113,7 @@ export default function DashboardLayout() {
               onEventSelect={handleEventSelect}
               onMapClick={handleMapClick}
               selectedEvent={selectedEvent}
+              activePrediction={activePrediction}
             />
           )}
 
@@ -139,7 +141,7 @@ export default function DashboardLayout() {
             ${panelOpen ? 'translate-x-0' : 'translate-x-full lg:translate-x-0 lg:hidden'}
           `}
         >
-          <CopilotPanel clickedCoords={clickedCoords} />
+          <CopilotPanel clickedCoords={clickedCoords} onPrediction={setActivePrediction} />
         </div>
 
         {/* Mobile overlay backdrop */}
