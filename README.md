@@ -108,7 +108,7 @@ An AI-powered Congestion Copilot that predicts localized traffic bottlenecks cau
 |-------|-----------|---------|
 | **Framework** | Next.js (App Router) | 16.x |
 | **Language** | TypeScript | 5.x |
-| **Styling** | Tailwind CSS | 4.x |
+| **Styling** | Tailwind CSS | 3.x |
 | **Map** | MapLibre GL + React Map GL | 5.x / 8.x |
 | **Database** | MongoDB + Mongoose | 9.x |
 | **AI/LLM** | Groq (llama-3.3-70b-versatile) | Latest |
@@ -396,3 +396,7 @@ CMD ["npm", "start"]
 ## License
 
 This project is licensed under the Apache-2.0 License. See [LICENSE](./LICENSE) for details.
+
+---
+
+_Built with ❤️ by Sambit Mondal_
