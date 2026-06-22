@@ -84,11 +84,12 @@ An AI-powered Congestion Copilot that predicts localized traffic bottlenecks cau
 - Fly-to animations on event selection
 
 ### 🤖 AI Copilot Panel
-- **Event Form**: Input new traffic events with map click integration
+- **Conversational AI**: Log events via natural language chat powered by Groq and Nominatim geocoding.
+- **Event Form**: Manual fallback input with map click integration
 - **RAG-Powered Analysis**: Retrieves similar historical events within 2km radius
 - **Groq LLM Analysis**: Generates predictions using llama-3.3-70b-versatile
 - **Prediction Cards**: Forecasted delay, recommended manpower, risk level
-- **Diversion Strategy**: Actionable barricading and route recommendations
+- **Diversion Strategy & Visual Routing**: Actionable text recommendations plus glowing detour lines drawn directly on the map (via OSRM).
 
 ### 📊 Dashboard Metrics
 - Total events, active events, average resolution time
@@ -390,6 +391,17 @@ CMD ["npm", "start"]
 - Set `MONGODB_URI` to your MongoDB Atlas cluster for production
 - Ensure `GROQ_API_KEY` is set as a secret in your deployment platform
 - The map tiles are loaded from CARTO CDN (no API key required)
+
+---
+
+## Future Scope (Enterprise Scaling)
+
+While the current prototype serves as a highly functional control room dashboard, the following features are planned for enterprise deployment:
+
+1. **Real-Time Data Sync & RBAC**: Add NextAuth.js for Role-Based Access Control (Admin vs. Field Officer). Sync live events from field devices directly to the map via Socket.io without refreshing.
+2. **CCTV Camera Feeds**: Plot permanent camera markers on major junctions. Clicking them opens a simulated live video feed, crucial for traffic operation verification.
+3. **Time-Lapse / Simulation Slider**: Add a timeline slider to visually "play back" how traffic congestion incidents evolved over the last 24 hours.
+4. **Mobile-Optimized Field Reporting**: Build a dedicated `/field` route stripping away analytics, providing a highly responsive, mobile-first UI for police officers to log incidents via phone GPS.
 
 ---
 
