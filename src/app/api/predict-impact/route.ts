@@ -108,9 +108,38 @@ export async function POST(request: Request): Promise<NextResponse<PredictImpact
     const prediction = await analyzeEvent(newEvent, similarEvents);
     console.log('[Predict] Analysis complete');
 
+    // Step 3: Visual Diversion Routing via OSRM
+    try {
+      console.log('[Predict] Calculating visual diversion route...');
+      // Create a 500m offset roughly for start and end points of a detour
+      const offset = 0.0045; // roughly 500m in degrees
+      const startLng = reqData.longitude - offset;
+      const startLat = reqData.latitude + offset;
+      const endLng = reqData.longitude + offset;
+      const endLat = reqData.latitude - offset;
+
+      // OSRM routing API
+      const osrmUrl = `http://router.project-osrm.org/route/v1/driving/${startLng},${startLat};${endLng},${endLat}?overview=full&geometries=geojson`;
+      const osrmRes = await fetch(osrmUrl);
+      if (osrmRes.ok) {
+        const osrmData = await osrmRes.json();
+        if (osrmData.routes && osrmData.routes.length > 0) {
+          prediction.diversionRouteGeoJSON = osrmData.routes[0].geometry;
+        }
+      }
+    } catch (err) {
+      console.error('[Predict] Failed to calculate visual route:', err);
+    }
+
     return NextResponse.json({
       success: true,
-      prediction,
+      prediction: {
+        ...prediction,
+        eventLocation: {
+          latitude: reqData.latitude,
+          longitude: reqData.longitude,
+        }
+      },
     });
   } catch (error: unknown) {
     console.error('[API /predict-impact] Error:', error);

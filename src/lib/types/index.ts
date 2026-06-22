@@ -153,6 +153,8 @@ export interface PredictionResult {
   riskLevel: RiskLevel;
   estimatedClearanceTime: string;
   nearbyResources: string[];
+  diversionRouteGeoJSON?: any;
+  eventLocation?: { latitude: number; longitude: number };
 }
 
 export type RiskLevel = 'low' | 'medium' | 'high' | 'critical';

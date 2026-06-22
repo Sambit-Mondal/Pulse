@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useCallback, useRef, useEffect, useState } from 'react';
-import Map, { Marker, Popup, NavigationControl, type MapRef, type ViewStateChangeEvent } from 'react-map-gl/maplibre';
+import Map, { Marker, Popup, NavigationControl, Source, Layer, type MapRef, type ViewStateChangeEvent } from 'react-map-gl/maplibre';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import type { ProcessedEvent } from '@/lib/types';
 import EventMarker from './EventMarker';
@@ -25,9 +25,10 @@ interface MapViewProps {
   onEventSelect: (event: ProcessedEvent) => void;
   onMapClick: (lat: number, lng: number) => void;
   selectedEvent: ProcessedEvent | null;
+  activePrediction?: any;
 }
 
-export default function MapView({ events, onEventSelect, onMapClick, selectedEvent }: MapViewProps) {
+export default function MapView({ events, onEventSelect, onMapClick, selectedEvent, activePrediction }: MapViewProps) {
   const mapRef = useRef<MapRef>(null);
   const [popupEvent, setPopupEvent] = useState<ProcessedEvent | null>(null);
   const [viewState, setViewState] = useState(BENGALURU_CENTER);
@@ -65,6 +66,42 @@ export default function MapView({ events, onEventSelect, onMapClick, selectedEve
       });
     }
   }, [selectedEvent]);
+
+  // Fly to predicted route or event location
+  useEffect(() => {
+    if (activePrediction && mapRef.current) {
+      if (activePrediction.diversionRouteGeoJSON) {
+        const coords = activePrediction.diversionRouteGeoJSON.coordinates;
+        if (coords && coords.length > 0) {
+          let minLng = 180, maxLng = -180, minLat = 90, maxLat = -90;
+          coords.forEach(([lng, lat]: [number, number]) => {
+            if (lng < minLng) minLng = lng;
+            if (lng > maxLng) maxLng = lng;
+            if (lat < minLat) minLat = lat;
+            if (lat > maxLat) maxLat = lat;
+          });
+          
+          const centerLng = (minLng + maxLng) / 2;
+          const centerLat = (minLat + maxLat) / 2;
+
+          mapRef.current.flyTo({
+            center: [centerLng, centerLat],
+            zoom: 14.5,
+            duration: 1500,
+          });
+          return;
+        }
+      }
+      
+      if (activePrediction.eventLocation) {
+        mapRef.current.flyTo({
+          center: [activePrediction.eventLocation.longitude, activePrediction.eventLocation.latitude],
+          zoom: 15,
+          duration: 1500,
+        });
+      }
+    }
+  }, [activePrediction]);
 
   const handleViewStateChange = useCallback((e: ViewStateChangeEvent) => {
     setViewState(e.viewState);
@@ -145,6 +182,55 @@ export default function MapView({ events, onEventSelect, onMapClick, selectedEve
               </div>
             </div>
           </Popup>
+        )}
+
+        {/* Visual Diversion Route */}
+        {activePrediction?.diversionRouteGeoJSON && (
+          <Source type="geojson" data={activePrediction.diversionRouteGeoJSON}>
+            {/* Outer glow layer */}
+            <Layer
+              id="diversion-route-glow"
+              type="line"
+              layout={{
+                'line-join': 'round',
+                'line-cap': 'round'
+              }}
+              paint={{
+                'line-color': '#06b6d4', // cyan-500
+                'line-width': 14,
+                'line-opacity': 0.4,
+                'line-blur': 6
+              }}
+            />
+            {/* Solid cyan body */}
+            <Layer
+              id="diversion-route"
+              type="line"
+              layout={{
+                'line-join': 'round',
+                'line-cap': 'round'
+              }}
+              paint={{
+                'line-color': '#22d3ee', // cyan-400
+                'line-width': 6,
+                'line-opacity': 1,
+              }}
+            />
+            {/* Inner glowing core */}
+            <Layer
+              id="diversion-route-inner"
+              type="line"
+              layout={{
+                'line-join': 'round',
+                'line-cap': 'round'
+              }}
+              paint={{
+                'line-color': '#ffffff',
+                'line-width': 2,
+                'line-opacity': 1,
+              }}
+            />
+          </Source>
         )}
       </Map>
 
